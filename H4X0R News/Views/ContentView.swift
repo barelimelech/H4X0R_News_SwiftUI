@@ -9,24 +9,33 @@ import SwiftUI
 
 struct ContentView: View {
     
-    @ObservedObject var networkManager = NetworkManager()
+    @StateObject var networkManager = NetworkManager()
     
     var body: some View {
-        NavigationView {
-            List(networkManager.posts) { post in
-                NavigationLink(destination: DetailView(url: post.url)) {
-                    HStack {
-                        Text(String(post.points))
-                        Text(post.title)
-                    }
-                }
-            }
-            .navigationTitle("H4X0R News")
-        }
-        .onAppear {
-            self.networkManager.fetchData()
-        }
-    }
+           NavigationStack {
+               List(networkManager.posts) { post in
+                   if let url = post.url, !url.isEmpty {
+                       NavigationLink(destination: DetailView(url: url)) {
+                           HStack {
+                               Text(String(post.points))
+                                   .fontWeight(.bold)
+                               Text(post.title)
+                           }
+                       }
+                   } else {
+                       HStack {
+                           Text(String(post.points))
+                               .fontWeight(.bold)
+                           Text(post.title)
+                       }
+                   }
+               }
+               .navigationTitle("H4X0R News")
+           }
+           .task {
+               await networkManager.fetchData()
+           }
+       }
 }
 
 #Preview {
